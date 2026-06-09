@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usersapi-deploy
+  labels:
+    app: usersapi
+spec:
+  replicas: 1 # Cuántas copias de tu app quieres corriendo
+  selector:
+    matchLabels:
+      app: usersapi
+  template: # De aquí hacia abajo es la definición de tu Pod
+    metadata:
+      labels:
+        app: usersapi # Esta etiqueta es crucial para que el Service lo encuentre
+    spec:
+      containers:
+      - name: usersapi-container
+        image: jeanvg/usersapi:latest # ¡Aquí va tu imagen!
+        ports:
+        - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
+        
+        # Así inyectamos variables de entorno (como en el docker-compose)
+        env:
+        - name: SERVER_PORT
+          value: {{ .Values.apis.port | quote }}
+        - name: AUTH_API_ADDRESS
+          value: {{ .Values.services.authApiAddress | quote }}
+        - name: ZIPKIN_URL
+          value: {{ .Values.services.zipkinUrl | quote }}
+        - name: JWT_SECRET
+          value: {{ .Values.global.jwtSecret | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: usersapi-service # Este es el nombre DNS que usarán otros microservicios
+spec:
+  selector:
+    app: usersapi # Busca los pods que tengan esta etiqueta creada en el Deployment
+  ports:
+  - protocol: TCP
+    port: 80 # El puerto que expone el Service internamente en el clúster
+    targetPort: 8080 # El puerto al que redirige el tráfico (hacia el containerPort)

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todosapi-deploy
+  labels:
+    app: todosapi
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: todosapi
+  template: 
+    metadata:
+      labels:
+        app: todosapi 
+    spec:
+      containers:
+      - name: todosapi-container
+        image: jeanvg/todosapi:latest
+        ports:
+        - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
+        
+        # Así inyectamos variables de entorno (como en el docker-compose)
+        env:
+        - name: TODO_API_PORT
+          value: {{ .Values.apis.port | quote }}
+        - name: JWT_SECRET
+          value: {{ .Values.global.jwtSecret | quote }}
+        - name: REDIS_HOST
+          value: {{ .Values.global.redisHost | quote }}
+        - name: REDIS_PORT
+          value: {{ .Values.global.redisPort | quote }}
+        - name: REDIS_CHANNEL
+          value: {{ .Values.global.redisChannel | quote }}
+        - name: ZIPKIN_URL
+          value: {{ .Values.services.zipkinUrl | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todosapi-service # Este es el nombre DNS que usarán otros microservicios
+spec:
+  selector:
+    app: todosapi # Busca los pods que tengan esta etiqueta creada en el Deployment
+  ports:
+  - protocol: TCP
+    port: 80 # El puerto que expone el Service internamente en el clúster
+    targetPort: 8080 # El puerto al que redirige el tráfico (hacia el containerPort)

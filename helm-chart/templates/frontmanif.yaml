@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-deploy
+  labels:
+    app: frontend
+spec:
+  replicas: 1 # Cuántas copias de tu app quieres corriendo
+  selector:
+    matchLabels:
+      app: frontend
+  template: # De aquí hacia abajo es la definición de tu Pod
+    metadata:
+      labels:
+        app: frontend # Esta etiqueta es crucial para que el Service lo encuentre
+    spec:
+      containers:
+      - name: front-container
+        image: jeanvg/frontend:latest # ¡Aquí va tu imagen!
+        ports:
+        - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
+        
+        # Así inyectamos variables de entorno (como en el docker-compose)
+        env:
+        - name: PORT
+          value: {{ .Values.apis.port | quote }} 
+        - name: TODOS_API_ADDRESS
+          value: {{ .Values.services.todosApiAddress | quote }}
+        - name: AUTH_API_ADDRESS
+          value: {{ .Values.services.authApiAddress | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-service # Este es el nombre DNS que usarán otros microservicios
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend # Busca los pods que tengan esta etiqueta creada en el Deployment
+  ports:
+  - protocol: TCP
+    port: 80 # El puerto que expone el Service internamente en el clúster
+    targetPort: 8080 # El puerto al que redirige el tráfico (hacia el containerPort)

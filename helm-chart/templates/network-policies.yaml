@@ -1,0 +1,195 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {} 
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-all
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - {} # Llaves vacías en ingress significa: "Permitir entrada desde cualquier lado" (Internet)
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: authapi
+  - to:
+    - podSelector:
+        matchLabels:
+          app: todosapi
+---
+# 4. POLÍTICAS PARA LAS APIS (Auth, Users, TODOS)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: authapi-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: authapi
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: usersapi
+  - to:
+    - podSelector:
+        matchLabels:
+          app: zipkin
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: todosapi-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: todosapi
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-queue
+  - to:
+    - podSelector:
+        matchLabels:
+          app: zipkin
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: usersapi-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: usersapi
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: authapi
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: zipkin
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: redis-queue
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: todosapi
+  - from:
+    - podSelector:
+        matchLabels:
+          app: log-processor
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: log-processor-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: log-processor
+  policyTypes:
+  - Egress # No tiene Ingress porque nadie lo llama, él va hacia Redis
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-queue
+  - to:
+    - podSelector:
+        matchLabels:
+          app: zipkin
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: zipkin-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: zipkin
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: authapi
+  - from:
+    - podSelector:
+        matchLabels:
+          app: usersapi
+  - from:
+    - podSelector:
+        matchLabels:
+          app: todosapi
+  - from:
+    - podSelector:
+        matchLabels:
+          app: log-processor

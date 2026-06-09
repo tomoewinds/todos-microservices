@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logpr-deploy
+  labels:
+    app: logpr
+spec:
+  replicas: 1 # Cuántas copias de tu app quieres corriendo
+  selector:
+    matchLabels:
+      app: logpr
+  template: # De aquí hacia abajo es la definición de tu Pod
+    metadata:
+      labels:
+        app: logpr # Esta etiqueta es crucial para que el Service lo encuentre
+    spec:
+      containers:
+      - name: logpr-container
+        image: jeanvg/logpr:latest # ¡Aquí va tu imagen!
+        ports:
+        - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
+        env:
+        - name: REDIS_HOST
+          value: {{ .Values.global.redisHost | quote }}
+        - name: REDIS_PORT
+          value: {{ .Values.global.redisPort | quote }}
+        - name: REDIS_CHANNEL
+          value: {{ .Values.global.redisChannel | quote }}
+        - name: REDIS_URL
+          value: {{ .Values.global.redisUrl | quote }}
+        - name: ZIPKIN_URL
+          value: {{ .Values.services.zipkinUrl | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logpr-service # Este es el nombre DNS que usarán otros microservicios
+spec:
+  selector:
+    app: logpr # Busca los pods que tengan esta etiqueta creada en el Deployment
+  ports:
+  - protocol: TCP
+    port: 80 # El puerto que expone el Service internamente en el clúster
+    targetPort: 8080 # El puerto al que redirige el tráfico (hacia el containerPort)
