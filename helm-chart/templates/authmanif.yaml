@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authapi-deploy
+  labels:
+    app: authapi
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: authapi
+  template: 
+    metadata:
+      labels:
+        app: authapi
+    spec:
+      containers:
+      - name: authapi-container
+        image: jeanvg/authapi:latest # ¡Aquí va tu imagen!
+        ports:
+        - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
+        
+        # Así inyectamos variables de entorno (como en el docker-compose)
+        env:
+        - name: USERS_API_ADDRESS
+          value: {{ .Values.services.usersApiAddress | quote }}
+        - name: AUTH_API_PORT
+          value: {{ .Values.apis.port | quote }}
+        - name: JWT_SECRET
+          value: {{ .Values.global.jwtSecret | quote }}
+        - name: ZIPKIN_URL
+          value: {{ .Values.services.zipkinUrl | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authapi-service # Este es el nombre DNS que usarán otros microservicios
+spec:
+  selector:
+    app: authapi # Busca los pods que tengan esta etiqueta creada en el Deployment
+  ports:
+  - protocol: TCP
+    port: 80 # El puerto que expone el Service internamente en el clúster
+    targetPort: 8080 # El puerto al que redirige el tráfico (hacia el containerPort)
