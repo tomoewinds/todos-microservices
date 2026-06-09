@@ -1,6 +1,6 @@
 # values.yaml
 global:
-  jwtSecret: "sup3rS3cr3tK3y"
+  jwtSecret: "replace-in-production"
   redisHost: "redis-service"
   redisPort: "6379"
   redisChannel: "log_channel"
@@ -17,6 +17,6 @@ services:
   todosApiAddress: "http://todosapi-service:80"
   zipkinUrl: "http://zipkin-service:9411"
 
-# Puedes agregar aquí las versiones de tus imágenes si lo deseas
+
 images:
   pullPolicy: Always

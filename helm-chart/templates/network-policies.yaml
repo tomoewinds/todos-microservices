@@ -40,7 +40,7 @@ spec:
   - Ingress
   - Egress
   ingress:
-  - {} # Llaves vacías en ingress significa: "Permitir entrada desde cualquier lado" (Internet)
+  - {} 
   egress:
   - to:
     - podSelector:
@@ -51,7 +51,7 @@ spec:
         matchLabels:
           app: todosapi
 ---
-# 4. POLÍTICAS PARA LAS APIS (Auth, Users, TODOS)
+
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -155,7 +155,7 @@ spec:
     matchLabels:
       app: log-processor
   policyTypes:
-  - Egress # No tiene Ingress porque nadie lo llama, él va hacia Redis
+  - Egress 
   egress:
   - to:
     - podSelector:
