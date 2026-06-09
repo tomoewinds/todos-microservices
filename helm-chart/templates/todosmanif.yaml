@@ -18,32 +18,49 @@ spec:
       - name: todosapi-container
         image: jeanvg/todosapi:latest
         ports:
-        - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
+        - containerPort: 8080 
         
-        # Así inyectamos variables de entorno (como en el docker-compose)
         env:
         - name: TODO_API_PORT
-          value: {{ .Values.apis.port | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: APIS_PORT
         - name: JWT_SECRET
-          value: {{ .Values.global.jwtSecret | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: JWT_SECRET
         - name: REDIS_HOST
-          value: {{ .Values.global.redisHost | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REDIS_HOST
         - name: REDIS_PORT
-          value: {{ .Values.global.redisPort | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REDIS_PORT
         - name: REDIS_CHANNEL
-          value: {{ .Values.global.redisChannel | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REDIS_CHANNEL
         - name: ZIPKIN_URL
-          value: {{ .Values.services.zipkinUrl | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: ZIPKIN_URL
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: todosapi-service # Este es el nombre DNS que usarán otros microservicios
+  name: todosapi-service 
 spec:
   selector:
-    app: todosapi # Busca los pods que tengan esta etiqueta creada en el Deployment
+    app: todosapi 
   ports:
   - protocol: TCP
-    port: 80 # El puerto que expone el Service internamente en el clúster
-    targetPort: 8080 # El puerto al que redirige el tráfico (hacia el containerPort)
+    port: 80 
+    targetPort: 8080 

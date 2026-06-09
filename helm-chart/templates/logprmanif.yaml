@@ -21,15 +21,30 @@ spec:
         - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
         env:
         - name: REDIS_HOST
-          value: {{ .Values.global.redisHost | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REDIS_HOST
         - name: REDIS_PORT
-          value: {{ .Values.global.redisPort | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REDIS_PORT
         - name: REDIS_CHANNEL
-          value: {{ .Values.global.redisChannel | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REDIS_CHANNEL
         - name: REDIS_URL
-          value: {{ .Values.global.redisUrl | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REDIS_URL
         - name: ZIPKIN_URL
-          value: {{ .Values.services.zipkinUrl | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: ZIPKIN_URL
 
 ---
 apiVersion: v1

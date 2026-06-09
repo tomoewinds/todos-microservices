@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
       - name: zipkin
-        image: openzipkin/zipkin:latest # Imagen oficial de la comunidad Zipkin
+        image: openzipkin/zipkin:latest 
         ports:
         - containerPort: 9411
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: zipkin-service # Nombre DNS que usarán las APIs para enviar Traces
+  name: zipkin-service 
 spec:
   selector:
     app: zipkin

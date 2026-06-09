@@ -23,11 +23,20 @@ spec:
         # Así inyectamos variables de entorno (como en el docker-compose)
         env:
         - name: PORT
-          value: {{ .Values.apis.port | quote }} 
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: FRONTEND_PORT
         - name: TODOS_API_ADDRESS
-          value: {{ .Values.services.todosApiAddress | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: TODOS_API_ADDRESS
         - name: AUTH_API_ADDRESS
-          value: {{ .Values.services.authApiAddress | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: AUTH_API_ADDRESS
 
 ---
 apiVersion: v1
