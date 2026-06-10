@@ -38,8 +38,8 @@ spec:
               key: ZIPKIN_URL
         - name: JWT_SECRET
           valueFrom:
-            configMapKeyRef:
-              name: app-configmap
+            secretKeyRef:
+              name: app-secret
               key: JWT_SECRET
 
 ---

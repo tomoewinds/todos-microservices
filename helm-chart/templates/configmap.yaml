@@ -12,3 +12,4 @@ data:
   AUTH_API_ADDRESS: {{ .Values.services.authApiAddress | quote }}
   TODOS_API_ADDRESS: {{ .Values.services.todosApiAddress | quote }}
   USERS_API_ADDRESS: {{ .Values.services.usersApiAddress | quote }}
+  ZIPKIN_URL: {{ .Values.services.zipkinUrl | quote }}

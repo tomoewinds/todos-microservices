@@ -5,22 +5,22 @@ metadata:
   labels:
     app: frontend
 spec:
-  replicas: 1 # Cuántas copias de tu app quieres corriendo
+  replicas: 1 
   selector:
     matchLabels:
       app: frontend
-  template: # De aquí hacia abajo es la definición de tu Pod
+  template: 
     metadata:
       labels:
-        app: frontend # Esta etiqueta es crucial para que el Service lo encuentre
+        app: frontend 
     spec:
       containers:
       - name: front-container
-        image: jeanvg/frontend:latest # ¡Aquí va tu imagen!
+        image: jeanvg/frontend:latest 
         ports:
-        - containerPort: 8080 # El puerto en el que escucha tu app en Go internamente
+        - containerPort: 8080 
         
-        # Así inyectamos variables de entorno (como en el docker-compose)
+        
         env:
         - name: PORT
           valueFrom:
@@ -42,12 +42,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: front-service # Este es el nombre DNS que usarán otros microservicios
+  name: front-service 
 spec:
   type: LoadBalancer
   selector:
-    app: frontend # Busca los pods que tengan esta etiqueta creada en el Deployment
+    app: frontend 
   ports:
   - protocol: TCP
-    port: 80 # El puerto que expone el Service internamente en el clúster
-    targetPort: 8080 # El puerto al que redirige el tráfico (hacia el containerPort)
+    port: 80 
+    targetPort: 8080 

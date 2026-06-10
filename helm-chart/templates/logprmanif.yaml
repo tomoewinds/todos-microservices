@@ -35,11 +35,6 @@ spec:
             configMapKeyRef:
               name: app-configmap
               key: REDIS_CHANNEL
-        - name: REDIS_URL
-          valueFrom:
-            configMapKeyRef:
-              name: app-configmap
-              key: REDIS_URL
         - name: ZIPKIN_URL
           valueFrom:
             configMapKeyRef:
