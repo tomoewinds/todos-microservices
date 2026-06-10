@@ -1,0 +1,32 @@
+name: Deploy Microservices to AKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+
+      - name: Helm Installation
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
+
+      - name: Config connection to AKS
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+
+      - name: Helm deploy
+        run: |
+          helm upgrade --install todosapp ./helm-chart \
+            --namespace app-production \
+            --set global.jwtSecret=${{ secrets.JWT_SECRET }}
