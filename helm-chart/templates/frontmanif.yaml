@@ -19,8 +19,6 @@ spec:
         image: jeanvg/frontend:latest 
         ports:
         - containerPort: 8080 
-        
-        
         env:
         - name: PORT
           valueFrom:
@@ -37,6 +35,13 @@ spec:
             configMapKeyRef:
               name: app-configmap
               key: AUTH_API_ADDRESS
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu | quote }}
+            memory: {{ .Values.resources.requests.memory | quote }}
+          limits:
+            cpu: {{ .Values.resources.limits.cpu | quote }}
+            memory: {{ .Values.resources.limits.memory | quote }}
 
 ---
 apiVersion: v1

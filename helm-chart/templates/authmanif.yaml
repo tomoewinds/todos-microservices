@@ -19,8 +19,6 @@ spec:
         image: jeanvg/authapi:latest 
         ports:
         - containerPort: 8080 
-        
-        
         env:
         - name: USERS_API_ADDRESS
           valueFrom:
@@ -42,6 +40,13 @@ spec:
             configMapKeyRef:
               name: app-configmap
               key: ZIPKIN_URL
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu | quote }}
+            memory: {{ .Values.resources.requests.memory | quote }}
+          limits:
+            cpu: {{ .Values.resources.limits.cpu | quote }}
+            memory: {{ .Values.resources.limits.memory | quote }}
 
 ---
 apiVersion: v1
